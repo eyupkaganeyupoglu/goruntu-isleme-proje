@@ -1,10 +1,3 @@
-# Python version:  3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]
-# OpenCV version:  4.9.0
-# Numpy version:   1.26.4
-# PyQt5 version:   5.15.10
-
-# DİKKAT: cv2 türkçe karakterlere karşı sorun çıkarıyor. Bu yüzden uygulamayı ascii'ye uygun karakterler içeren path'da çalıştırdığınıza emin olun...
-
 import sys
 from PyQt5.QtWidgets import QApplication, QTextEdit, QWidget, QVBoxLayout, QPushButton, QComboBox, QLabel, QFileDialog, QInputDialog
 from PyQt5.QtGui import QPixmap, QImage, QColor
@@ -43,16 +36,6 @@ class App(QWidget):
         self.operation_combo.addItem('Image Cropping')
         self.operation_combo.addItem('Image Zoom in')
         self.operation_combo.addItem('Image Zoom out')
-        # self.operation_combo.addItem('Color Space Transformations')
-        # self.operation_combo.addItem('Histogram Stretching/Widening')
-        # self.operation_combo.addItem('Arithmetic Operations (Addition, Division)')
-        # self.operation_combo.addItem('Contrast Enhancement')
-        # self.operation_combo.addItem('Convolution Operation (Mean)')
-        # self.operation_combo.addItem('Thresholding Operations (Single Thresholding)')
-        # self.operation_combo.addItem('Edge Detection Algorithms (Prewitt)')
-        # self.operation_combo.addItem('Noise Removal (Salt & Pepper)')
-        # self.operation_combo.addItem('Apply Filter (Unsharp)')
-        # self.operation_combo.addItem('Morphological Operations (Expansion, Abrasion, Opening, Closing)')
         
         self.layout.addWidget(self.operation_combo)
 
@@ -71,7 +54,6 @@ class App(QWidget):
 ########################################  T E M E L    F O N K S İ Y O N L A R  ########################################
 
     def update_terminal_codes(self, index):
-        # DİKKAT: operation_texts'da operasyonların ne işe yaradıklarını ve nasıl çalıştıklarını toplam 2 cümle ile açıkla. Matematiksel formülleri de ekle.
         operation_texts = [
             "İşlem Seç",
             """Gri Dönüşüm
@@ -126,16 +108,6 @@ Bu işlem, görüntünün En Yakın Komşu Enterpolasyonu ile yakınlaştırılm
             """Görüntü Uzaklaştırma
 Bu işlem, görüntünün En Yakın Komşu Enterpolasyonu ile uzaklaştırılmasını sağlar.
 """,
-            # "Color Space Transformations",
-            # "Histogram Stretching/Widening",
-            # "Arithmetic Operations (Addition, Division)",
-            # "Contrast Enhancement",
-            # "Convolution Operation (Mean)",
-            # "Thresholding Operations (Single Thresholding)",
-            # "Edge Detection Algorithms (Prewitt)",
-            # "Noise Removal (Salt & Pepper)",
-            # "Apply Filter (Unsharp)",
-            # "Morphological Operations (Expansion, Abrasion, Opening, Closing)"
         ]
         if index == 0:
             self.terminal_codes.clear()
@@ -145,9 +117,8 @@ Bu işlem, görüntünün En Yakın Komşu Enterpolasyonu ile uzaklaştırılmas
             self.terminal_codes.clear()
             self.terminal_codes.setTextColor(blue_color)
             self.terminal_codes.append(operation_texts[index])
-
+            
     def upload_image(self):
-        # NOT (BİLGİLENDİRME): Temporary code for testing
         file_name = "result\cameraman.jpg"
         if file_name:
             self.image = cv2.imread(file_name)
@@ -155,55 +126,37 @@ Bu işlem, görüntünün En Yakın Komşu Enterpolasyonu ile uzaklaştırılmas
             self.terminal_codes.clear()
             self.terminal_codes.setTextColor(green_color)
             self.terminal_codes.append("Source image uploaded.")
-        # NOT (BİLGİLENDİRME): Actual code
-        # try:
-        #     file_name, _ = QFileDialog.getOpenFileName(self, 'Open Image', '', 'Image Files (*.jpg *.png)')
-        #     if file_name:
-        #         self.image = cv2.imread(file_name)
-        #         self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-        #         self.terminal_codes.clear()
-        #         self.terminal_codes.setTextColor(green_color)
-        #         self.terminal_codes.append("Source image uploaded.")
-        # except Exception as e:
-        #     self.terminal_codes.clear()
-        #     self.terminal_codes.setTextColor(red_color)
-        #     self.terminal_codes.append("Error occurred while uploading image: {}".format(str(e)))
-        #     self.terminal_codes.setTextColor(blue_color)
-        #     self.terminal_codes.append("An error may occur when the path where the image is located does not conform to ASCII standards. Use a path that does not contain Turkish characters.\n\nMake sure that the image you want to upload is in JPG or PNG format.")
-        # finally:
-        #     pass
-
-    # TODO: Birinci grubun ödevi olan bütün operasyonları ve bunların fonksiyonlarını yazdıktan sonra GitHub için ikinci ve üçüncü grubun ödevi olan bütün operasyonları ve bunların fonksiyonları da ekle.
+    
     def apply_operation(self):
-
+        
         if self.image is None:
             self.terminal_codes.clear()
             self.terminal_codes.setTextColor(red_color)
             self.terminal_codes.append("Please upload an image first before applying any operation.")
             return
-
+        
         operation = self.operation_combo.currentText()
-
+        
         try:
             if operation == 'Select Operation':
                 self.terminal_codes.clear()
                 self.terminal_codes.setTextColor(red_color)
                 self.terminal_codes.append("Please select an operation.")
-
+                
             elif operation == 'Gray Conversion':
                 gray_image = self.convert_to_gray(self.image)
                 self.terminal_codes.clear()
                 self.download_image(gray_image)
                 self.terminal_codes.setTextColor(green_color)
                 self.terminal_codes.append("Gray Conversion operation was applied.")
-
+                
             elif operation == 'Binary Conversion':
                 binary_image = self.convert_to_binary(self.image)
                 self.terminal_codes.clear()
                 self.download_image(binary_image)
                 self.terminal_codes.setTextColor(green_color)
                 self.terminal_codes.append("Binary Conversion operation was applied.")
-
+                
             elif operation == 'Image Rotation':
                 angle, ok = QInputDialog.getDouble(self, 'Image Rotation', 'Enter angle:')
                 if ok:
@@ -262,62 +215,6 @@ Bu işlem, görüntünün En Yakın Komşu Enterpolasyonu ile uzaklaştırılmas
                     self.download_image(zoomed)
                     self.terminal_codes.append("Image zoomed out with a ratio of " + zoom_value + ".")
 
-            # elif operation == 'Color Space Transformations':
-            #     color_space, ok = QInputDialog.getItem(self, 'Color Space Transformations', 'Select color space:', ('RGB', 'HSV', 'HLS', 'GRAY', 'YCrCb', 'Lab', 'BGRA', 'BGR'))
-            #     if ok:
-            #         self.result_image_label.setPixmap(self.convert_to_color_space(self.image, color_space))
-            #         self.terminal_codes.append("Color Space Transformations operation was applied.")
-                    
-            # elif operation == 'Histogram Stretching/Widening':
-            #     choice, ok = QInputDialog.getItem(self, 'Histogram Stretching/Widening', 'Select operation:', ('Histogram Stretching', 'Histogram Widening'))
-            #     if ok:
-            #         value, ok = QInputDialog.getInt(self, 'Contrast Adjustment', 'Enter contrast value:')
-            #         if ok:
-            #             if choice == 'Histogram Stretching':
-            #                 self.result_image_label.setPixmap(self.stretch_histogram(self.image, value/10))
-            #                 self.terminal_codes.append("Histogram Stretching operation was applied.")
-            #             elif choice == 'Histogram Widening':
-            #                 self.result_image_label.setPixmap(self.widen_histogram(self.image, value/10))
-            #                 self.terminal_codes.append("Histogram Widening operation was applied.")
-                
-            # elif operation == 'Arithmetic Operations (Addition, Division)':
-            #     file_name, _ = QFileDialog.getOpenFileName(self, 'Open Image', '', 'Image Files (*.jpg *.png)')
-            #     if file_name:
-            #         image2 = cv2.imread(file_name)
-            #         image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2RGB)
-            #         op, ok = QInputDialog.getItem(self, 'Arithmetic Operations', 'Select operation:', ('Addition', 'Division'))
-            #         if ok:
-            #             if op == 'Addition':
-            #                 result = cv2.add(self.image, image2)
-            #             elif op == 'Division':
-            #                 result = cv2.divide(self.image, image2)
-            #             self.result_image_label.setPixmap(QPixmap.fromImage(QImage(result, result.shape[1], result.shape[0], QImage.Format_RGB888)))
-            #             self.terminal_codes.append("Arithmetic Operations operation was applied.")
-
-            # elif operation == 'Contrast Enhancement':
-            #     self.result_image_label.setPixmap(self.enhance_contrast(self.image))
-                
-            # elif operation == 'Convolution Operation (Mean)':
-            #     self.result_image_label.setPixmap(self.mean_filter(self.image))
-                
-            # elif operation == 'Thresholding Operations (Single Thresholding)':
-            #     threshold, ok = QInputDialog.getInt(self, 'Thresholding Operations', 'Enter threshold:')
-            #     if ok:
-            #         self.result_image_label.setPixmap(self.single_thresholding(self.image, threshold))
-                
-            # elif operation == 'Edge Detection Algorithms (Prewitt)':
-            #     self.result_image_label.setPixmap(self.prewitt_edge_detection(self.image))
-                
-            # elif operation == 'Noise Removal (Salt & Pepper)':
-            #     self.result_image_label.setPixmap(self.salt_pepper_noise_removal(self.image))
-                
-            # elif operation == 'ApplyFilter (Unsharp)':
-            #     self.result_image_label.setPixmap(self.unsharp_filter(self.image))
-                
-            # elif operation == 'Morphological Operations (Expansion, Abrasion, Opening, Closing)':
-            #     self.result_image_label.setPixmap(self.morphological_operation(self.image))
-        
-        # DİKKAT: Operation'ları yazmayı bitirdikten sonra o operation'a özel hatalar olursa bu hatalar için özel error mesajları hazırla.
         except Exception as e:
             self.terminal_codes.append("Error occurred while applying '{}' operation:\n\n{}".format(operation, str(e)))
         finally:
@@ -330,8 +227,6 @@ Bu işlem, görüntünün En Yakın Komşu Enterpolasyonu ile uzaklaştırılmas
             self.terminal_codes.append("Please apply an operation first before downloading the image.")
             return
         
-        # DİKKAT: Diğer operasyonlar için de bu sorgulamayı yap.
-        # TODO: Hepsi bitince aynı formattakileri birleştir.
         if self.operation_combo.currentText() == 'Gray Conversion':
             image = QPixmap.fromImage(QImage(image, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
             image.save(r"result\result.png", "PNG")
@@ -350,17 +245,13 @@ Bu işlem, görüntünün En Yakın Komşu Enterpolasyonu ile uzaklaştırılmas
             image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
             image.save(r"result\result.png", "PNG")
 
+
         self.terminal_codes.clear()
         self.terminal_codes.setTextColor(green_color)
         self.terminal_codes.append("Image downloaded as result.png.")
         
 ######################################## O P E R A S Y O N L A R ########################################
     
-    # TODO: Fonksiyonları okul PDF'lerinden araştır.
-        # TODO: Proje dağılım belgesinden doğru fonksiyonu mu araştırıyorsun kontrol et.
-        # TODO: PDF'lerden ve internetten araştırarak fonksiyonları matematiksel olarak ifade edebil.
-        # TODO: Programın donmadığını, çalıştığını kullanıcıya görsel bilgi olarak sunabil diye fonksiyonlar çalışırken ürettikleri değerleri terminal_codes'ya yazdır.
-        # TODO: Birinci grubun ödevi olan bütün operasyonları ve bunların fonksiyonlarını yazdıktan sonra GitHub için ikinci ve üçüncü grubun ödevi olan bütün operasyonları ve bunların fonksiyonları da ekle.
     def convert_to_gray(self, image):
         gray_image = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
         for i in range(image.shape[0]):
@@ -404,7 +295,6 @@ Bu işlem, görüntünün En Yakın Komşu Enterpolasyonu ile uzaklaştırılmas
         
         return rotated
 
-    # TODO: Bounding box olayını her açıda çalışacak şekilde yapamadım neden bilmiyorum. Hocaya sor.
     def rotate_image(self, image, angle):
         if angle in (0, 360, -360):
             return image
@@ -450,8 +340,6 @@ Bu işlem, görüntünün En Yakın Komşu Enterpolasyonu ile uzaklaştırılmas
         cropped = image[y1_:y2_, x1_:x2_]
         return cropped
 
-    # DESCRIPTION: https://i.stack.imgur.com/smBqi.png
-    # DESCRIPTION: https://i.stack.imgur.com/5Okih.png
     def zoom_in_image(self, image, zoom_value):
         h, w = image.shape[:2]
         new_h = h * zoom_value
@@ -472,8 +360,6 @@ Bu işlem, görüntünün En Yakın Komşu Enterpolasyonu ile uzaklaştırılmas
         h, w = image.shape[:2]
         new_h = h // zoom_value
         new_w = w // zoom_value
-        if new_h == 0 or new_w == 0:
-            return image.copy()
         zoomed = np.zeros((new_h, new_w, 3), dtype=np.uint8)
         for i in range(new_h):
             for j in range(new_w):
@@ -485,94 +371,8 @@ Bu işlem, görüntünün En Yakın Komşu Enterpolasyonu ile uzaklaştırılmas
                 avg = np.mean(block, axis=(0, 1)).astype(np.uint8)
                 zoomed[i, j] = avg
         return zoomed
-    
-    # def convert_to_color_space(self, image, color_space='RGB'):
-    #     if color_space == 'RGB':
-    #         return QPixmap.fromImage(QImage(image, image.shape[1], image.shape[0], QImage.Format_RGB888))
-    #     elif color_space == 'HSV':
-    #         return QPixmap.fromImage(QImage(cv2.cvtColor(image, cv2.COLOR_BGR2HSV), image.shape[1], image.shape[0], QImage.Format_RGB888))
-    #     elif color_space == 'HLS':
-    #         return QPixmap.fromImage(QImage(cv2.cvtColor(image, cv2.COLOR_BGR2HLS), image.shape[1], image.shape[0], QImage.Format_RGB888))
-    #     elif color_space == 'GRAY':
-    #         return QPixmap.fromImage(QImage(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), image.shape[1], image.shape[0], QImage.Format_Grayscale8))
-    #     elif color_space == 'YCrCb':
-    #         return QPixmap.fromImage(QImage(cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb), image.shape[1], image.shape[0], QImage.Format_RGB888))
-    #     elif color_space == 'Lab':
-    #         return QPixmap.fromImage(QImage(cv2.cvtColor(image, cv2.COLOR_BGR2Lab), image.shape[1], image.shape[0], QImage.Format_RGB888))
-    #     elif color_space == 'BGRA':
-    #         return QPixmap.fromImage(QImage(cv2.cvtColor(image, cv2.COLOR_BGR2BGRA), image.shape[1], image.shape[0], QImage.Format_RGBA8888))
-    #     elif color_space == 'BGR':
-    #         return QPixmap.fromImage(QImage(image, image.shape[1],image.shape[0], QImage.Format_RGB888))
-
-    # def widen_histogram(self, image, level):
-    #     img = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    #     img_eq = cv2.equalizeHist(img)
-    #     img_stretched = cv2.addWeighted(img, level, img_eq, 1 - level, 0)
-    #     return QPixmap.fromImage(QImage(img_stretched, img_stretched.shape[1], img_stretched.shape[0], QImage.Format_Grayscale8))
-
-    # def stretch_histogram(self, image, level):
-    #     img = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    #     img_eq = cv2.equalizeHist(img)
-    #     img_widen = cv2.addWeighted(img, 1 - level, img_eq, level, 0)
-    #     return QPixmap.fromImage(QImage(img_widen, img_widen.shape[1], img_widen.shape[0], QImage.Format_Grayscale8))
-
-    # def add_images(self, image1, image2):
-    #         return QPixmap.fromImage(QImage(cv2.add(image1, image2), image1.shape[1], image1.shape[0], QImage.Format_RGB888))
-
-    # def divide_images(self, image1, image2):
-    #     return QPixmap.fromImage(QImage(cv2.divide(image1, image2), image1.shape[1], image1.shape[0], QImage.Format_RGB888))
-
-    # def enhance_contrast(self, image):
-    #     img = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    #     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-    #     img = clahe.apply(img)
-    #     return QPixmap.fromImage(QImage(img, img.shape[1], img.shape[0], QImage.Format_Grayscale8))
-
-    # def mean_filter(self, image):
-    #     img = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    #     kernel = np.ones((3,3),np.float32)/9
-    #     img = cv2.filter2D(img, -1, kernel)
-    #     return QPixmap.fromImage(QImage(img, img.shape[1], img.shape[0], QImage.Format_Grayscale8))
-
-    # def single_thresholding(self, image, threshold):
-    #     img = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    #     _, binary = cv2.threshold(img, threshold, 255, cv2.THRESH_BINARY)
-    #     return QPixmap.fromImage(QImage(binary, binary.shape[1], binary.shape[0], QImage.Format_Grayscale8))
-
-    # def prewitt_edge_detection(self, image):
-    #     img = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    #     sobel_x = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=5)
-    #     sobel_y = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=5)
-    #     abs_sobel_x = np.absolute(sobel_x)
-    #     abs_sobel_y = np.absolute(sobel_y)
-    #     edges = np.uint8(np.sqrt(abs_sobel_x**2 + abs_sobel_y**2))
-    #     return QPixmap.fromImage(QImage(edges, edges.shape[1], edges.shape[0], QImage.Format_Grayscale8))
-
-    # def salt_pepper_noise_removal(self, image):
-    #     img = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    #     noise = np.random.randint(0, 255, (img.shape[0], img.shape[1]))
-    #     img[noise > 240] = 255
-    #     img[noise < 10] = 0
-    #     return QPixmap.fromImage(QImage(img, img.shape[1], img.shape[0], QImage.Format_Grayscale8))
-
-    # def unsharp_filter(self, image):
-    #     img = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    #     blurred = cv2.GaussianBlur(img, (5, 5), 0)
-    #     sharpened = cv2.addWeighted(img, 1.5, blurred, -0.5, 0)
-    #     return QPixmap.fromImage(QImage(sharpened, sharpened.shape[1], sharpened.shape[0], QImage.Format_Grayscale8))
-
-    # def morphological_operation(self, image):
-    #     img = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    #     kernel = np.ones((5,5),np.uint8)
-    #     opening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
-    #     closing = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
-    #     return QPixmap.fromImage(QImage(opening, opening.shape[1], opening.shape[0], QImage.Format_Grayscale8))
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = App()
     sys.exit(app.exec_())
-    
-# TODO (End): Kodda gerekli yerlere comment ekleyerek kodların nasıl çalıştıklarını açıkla.
-# TODO (End): download_image fonksiyonunda QImage.Format'ı her fonksiyon için farklı bir sorgu olacak şekilde ayarladın. Bunları aynı QImage.Format içerenleri birleştir.
-# TODO (End): Uzun sürecek işlemleri terminal_codes'da kırmızı ile belirt ki program dondu sanıp kapamasınlar. 
