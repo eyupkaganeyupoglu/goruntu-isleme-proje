@@ -31,7 +31,7 @@ class App(QWidget):
 
         self.operation_combo = QComboBox(self)
         self.operation_combo.addItem('Select Operation')
-        self.operation_combo.addItem('Thresholding')
+        self.operation_combo.addItem('Edge Detection Prewitt')
         
         self.layout.addWidget(self.operation_combo)
 
@@ -86,7 +86,7 @@ class App(QWidget):
                 self.terminal_codes.setTextColor(red_color)
                 self.terminal_codes.append("Please select an operation.")
 
-            elif operation == 'Thresholding':
+            elif operation == 'Edge Detection Prewitt':
                 # kodlar
                 pass
 
@@ -102,7 +102,7 @@ class App(QWidget):
             self.terminal_codes.append("Please apply an operation first before downloading the image.")
             return
         
-        elif self.operation_combo.currentText() == 'Thresholding':
+        elif self.operation_combo.currentText() == 'Edge Detection Prewitt':
             # kodlar
             pass
 
@@ -112,7 +112,7 @@ class App(QWidget):
         
 ######################################## O P E R A S Y O N L A R ########################################
     
-    def thresholding(self):
+    def edge_detection_prewitt(self):
         # kodlar
         pass
 

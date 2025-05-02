@@ -144,6 +144,10 @@ r"""Aritmetik İşlemler Toplama
 
 bilgiler...
 """,
+r"""Aritmetik İşlemler Bölme
+
+bilgiler...
+""",
 r"""Kontrast Artırma/Azaltma
 
 bilgiler...
@@ -153,6 +157,10 @@ r"""Konvolüsyon İşlemi Mean
 bilgiler...
 """,
 r"""Eşikleme (Thresholding)
+
+bilgiler...
+""",
+r"""Kenar Tespiti Prewitt
 
 bilgiler...
 """,

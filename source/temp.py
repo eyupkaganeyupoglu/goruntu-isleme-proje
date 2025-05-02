@@ -42,9 +42,11 @@ class App(QWidget):
         self.operation_combo.addItem('Histogram Stretching')
         self.operation_combo.addItem('Histogram Widening')
         self.operation_combo.addItem('Arithmetic Operations Addition')
+        self.operation_combo.addItem('Arithmetic Operations Division')
         self.operation_combo.addItem('Contrast Increase/Decrease')
         self.operation_combo.addItem('Convolution Operation Mean')
         self.operation_combo.addItem('Thresholding')
+        self.operation_combo.addItem('Edge Detection Prewitt')
         
         self.layout.addWidget(self.operation_combo)
 
@@ -208,6 +210,15 @@ class App(QWidget):
                 self.terminal_codes.setTextColor(green_color)
                 self.terminal_codes.append("Addition operation applied successfully.")
 
+            elif operation == 'Arithmetic Operations Division':
+                image2 = cv2.imread("result/image4.jpg")
+                image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2RGB)
+                image = self.arithmetic_operations_division(self.image, image2)
+                self.terminal_codes.clear()
+                self.download_image(image)
+                self.terminal_codes.setTextColor(green_color)
+                self.terminal_codes.append("Division operation applied successfully.")
+
             elif operation == 'Contrast Increase/Decrease':
                 contrast_value, ok = QInputDialog.getDouble(self, 'Contrast Count', 'Enter contrast count (default=1,0):')
                 if ok:
@@ -232,6 +243,13 @@ class App(QWidget):
                     self.download_image(image)
                     self.terminal_codes.setTextColor(green_color)
                     self.terminal_codes.append(f"Thresholding applied successfully with threshold={threshold_value}.")
+
+            elif operation == 'Edge Detection Prewitt':
+                image = self.edge_detection_prewitt(self.image)
+                self.terminal_codes.clear()
+                self.download_image(image)
+                self.terminal_codes.setTextColor(green_color)
+                self.terminal_codes.append("Edge Detection Prewitt operation was applied.")
 
         except Exception as e:
             self.terminal_codes.append("Error occurred while applying '{}' operation:\n\n{}".format(operation, str(e)))
@@ -277,6 +295,9 @@ class App(QWidget):
         elif self.operation_combo.currentText() == 'Arithmetic Operations Addition':
             image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
             image.save(r"result\result.png", "PNG")
+        elif self.operation_combo.currentText() == 'Arithmetic Operations Division':
+            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
+            image.save(r"result\result.png", "PNG")
         elif self.operation_combo.currentText() == 'Contrast Increase/Decrease':
             image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
             image.save(r"result\result.png", "PNG")
@@ -284,6 +305,9 @@ class App(QWidget):
             image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
             image.save(r"result\result.png", "PNG")
         elif self.operation_combo.currentText() == 'Thresholding':
+            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
+            image.save(r"result\result.png", "PNG")
+        elif self.operation_combo.currentText() == 'Edge Detection Prewitt':
             image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
             image.save(r"result\result.png", "PNG")
 
@@ -487,28 +511,32 @@ class App(QWidget):
         height, width, channels = image1.shape
         result = np.zeros((height, width, channels), dtype=np.uint8)
 
-        white_threshold = 245
+        for i in range(height):
+            for j in range(width):
+                for c in range(channels):
+                    result[i, j, c] = (int(image1[i, j, c]) + int(image2[i, j, c])) // 2
+
+        return result
+
+    #TODO: Düzgün çalışmıyor.
+    def arithmetic_operations_division(self, image1, image2):
+        if image1.shape != image2.shape:
+            raise ValueError("Images must be the same size for division.")
+        
+        height, width, channels = image1.shape
+        result = np.zeros((height, width, channels), dtype=np.uint8)
 
         for i in range(height):
             for j in range(width):
-                pixel1 = image1[i, j]
-                pixel2 = image2[i, j]
-
-                is_white1 = all(channel >= white_threshold for channel in pixel1)
-                is_white2 = all(channel >= white_threshold for channel in pixel2)
-
-                if not is_white1 and not is_white2:
-                    for c in range(channels):
-                        result[i, j, c] = min(int(pixel1[c]) + int(pixel2[c]), 255)
-                elif not is_white1:
-                    result[i, j] = pixel1
-                elif not is_white2:
-                    result[i, j] = pixel2
-                else:
-                    result[i, j] = [255, 255, 255]  # tam beyaz bırak
+                for c in range(channels):
+                    denominator = int(image2[i, j, c])
+                    if denominator == 0:
+                        result[i, j, c] = 255
+                    else:
+                        result[i, j, c] = min(int(image1[i, j, c]) // denominator, 255)
 
         return result
-    
+
     def contrast_increase_decrease(self, image, alpha=1.0, beta=0):
         image_float = image.astype(np.float32)
         result = alpha * (image_float - 128) + 128 + beta
@@ -545,6 +573,39 @@ class App(QWidget):
                     thresholded_image[y, x] = 0
 
         return thresholded_image
+
+    def edge_detection_prewitt(self, image):
+        if len(image.shape) == 3:
+            gray = self.convert_to_gray(image)
+        else:
+            gray = image
+
+        height, width = gray.shape
+        result = np.zeros_like(gray)
+
+        kernel_x = np.array([
+            [-1, 0, 1],
+            [-1, 0, 1],
+            [-1, 0, 1]
+        ])
+
+        kernel_y = np.array([
+            [1, 1, 1],
+            [0, 0, 0],
+            [-1, -1, -1]
+        ])
+
+        padded = np.pad(gray, ((1, 1), (1, 1)), mode='reflect')
+
+        for i in range(1, height + 1):
+            for j in range(1, width + 1):
+                region = padded[i - 1:i + 2, j - 1:j + 2]
+                gx = np.sum(kernel_x * region)
+                gy = np.sum(kernel_y * region)
+                gradient = min(int(np.sqrt(gx ** 2 + gy ** 2)), 255)
+                result[i - 1, j - 1] = gradient
+
+        return result
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
