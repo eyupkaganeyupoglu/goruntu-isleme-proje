@@ -148,4 +148,12 @@ r"""Kontrast Artırma/Azaltma
 
 bilgiler...
 """,
+r"""Konvolüsyon İşlemi Mean
+
+bilgiler...
+""",
+r"""Eşikleme (Thresholding)
+
+bilgiler...
+""",
 ]

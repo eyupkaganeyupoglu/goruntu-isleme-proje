@@ -43,6 +43,8 @@ class App(QWidget):
         self.operation_combo.addItem('Histogram Widening')
         self.operation_combo.addItem('Arithmetic Operations Addition')
         self.operation_combo.addItem('Contrast Increase/Decrease')
+        self.operation_combo.addItem('Convolution Operation Mean')
+        self.operation_combo.addItem('Thresholding')
         
         self.layout.addWidget(self.operation_combo)
 
@@ -215,6 +217,22 @@ class App(QWidget):
                     self.terminal_codes.setTextColor(green_color)
                     self.terminal_codes.append(f"Contrast boosting applied with alpha={contrast_value} successfully.")
 
+            elif operation == 'Convolution Operation Mean':
+                image = self.convolution_operation_mean(self.image)
+                self.terminal_codes.clear()
+                self.download_image(image)
+                self.terminal_codes.setTextColor(green_color)
+                self.terminal_codes.append("Convolution (Mean Filter) applied successfully.")
+
+            elif operation == 'Thresholding':
+                threshold_value, ok = QInputDialog.getInt(self, 'Threshold Value', 'Enter threshold value (0-255, default=127):')
+                if ok:
+                    image = self.thresholding(self.image, threshold=threshold_value)
+                    self.terminal_codes.clear()
+                    self.download_image(image)
+                    self.terminal_codes.setTextColor(green_color)
+                    self.terminal_codes.append(f"Thresholding applied successfully with threshold={threshold_value}.")
+
         except Exception as e:
             self.terminal_codes.append("Error occurred while applying '{}' operation:\n\n{}".format(operation, str(e)))
         finally:
@@ -261,6 +279,12 @@ class App(QWidget):
             image.save(r"result\result.png", "PNG")
         elif self.operation_combo.currentText() == 'Contrast Increase/Decrease':
             image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
+            image.save(r"result\result.png", "PNG")
+        elif self.operation_combo.currentText() == 'Convolution Operation Mean':
+            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
+            image.save(r"result\result.png", "PNG")
+        elif self.operation_combo.currentText() == 'Thresholding':
+            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
             image.save(r"result\result.png", "PNG")
 
         self.terminal_codes.clear()
@@ -412,7 +436,6 @@ class App(QWidget):
 
                 hsv_image[i, j] = [int(h / 2), int(s * 255), int(v * 255)]
         return hsv_image
-
     
     def convert_rgb_to_ycbcr(self, image):
         ycbcr_image = np.zeros_like(image, dtype=np.uint8)
@@ -492,6 +515,36 @@ class App(QWidget):
         result = np.clip(result, 0, 255).astype(np.uint8)
         return result
 
+    def convolution_operation_mean(self, image):
+        height, width, channels = image.shape
+        padded_image = np.pad(image, ((1, 1), (1, 1), (0, 0)), mode='reflect')
+        result = np.zeros_like(image, dtype=np.uint8)
+
+        for y in range(height):
+            for x in range(width):
+                for c in range(channels):
+                    neighborhood = padded_image[y:y+3, x:x+3, c]
+                    mean_value = np.mean(neighborhood)
+                    result[y, x, c] = int(mean_value)
+
+        return result
+
+    def thresholding(self, image, threshold=127):
+        if len(image.shape) == 3:
+            gray = self.convert_to_gray(image)
+        else:
+            gray = self.image
+
+        thresholded_image = np.zeros_like(gray, dtype=np.uint8)
+
+        for y in range(gray.shape[0]):
+            for x in range(gray.shape[1]):
+                if gray[y, x] > threshold:
+                    thresholded_image[y, x] = 255
+                else:
+                    thresholded_image[y, x] = 0
+
+        return thresholded_image
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

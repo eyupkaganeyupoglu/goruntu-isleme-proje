@@ -31,7 +31,7 @@ class App(QWidget):
 
         self.operation_combo = QComboBox(self)
         self.operation_combo.addItem('Select Operation')
-        self.operation_combo.addItem('Contrast Boosting')
+        self.operation_combo.addItem('Thresholding')
         
         self.layout.addWidget(self.operation_combo)
 
@@ -86,7 +86,7 @@ class App(QWidget):
                 self.terminal_codes.setTextColor(red_color)
                 self.terminal_codes.append("Please select an operation.")
 
-            elif operation == 'Contrast Boosting':
+            elif operation == 'Thresholding':
                 # kodlar
                 pass
 
@@ -102,7 +102,7 @@ class App(QWidget):
             self.terminal_codes.append("Please apply an operation first before downloading the image.")
             return
         
-        elif self.operation_combo.currentText() == 'Contrast Boosting':
+        elif self.operation_combo.currentText() == 'Thresholding':
             # kodlar
             pass
 
@@ -112,7 +112,7 @@ class App(QWidget):
         
 ######################################## O P E R A S Y O N L A R ########################################
     
-    def contrast_boosting(self, image):
+    def thresholding(self):
         # kodlar
         pass
 
