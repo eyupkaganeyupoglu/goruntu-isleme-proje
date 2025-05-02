@@ -4,6 +4,7 @@ from PyQt5.QtGui import QPixmap, QImage, QColor
 import cv2
 import numpy as np
 import math
+import all_operation_texts
 
 red_color = QColor(204, 0, 0)
 green_color = QColor(0, 153, 0)
@@ -30,9 +31,7 @@ class App(QWidget):
 
         self.operation_combo = QComboBox(self)
         self.operation_combo.addItem('Select Operation')
-        self.operation_combo.addItem('Gray Conversion')
-        self.operation_combo.addItem('Histogram Stretching')
-        self.operation_combo.addItem('Histogram Widening')
+        self.operation_combo.addItem('Contrast Boosting')
         
         self.layout.addWidget(self.operation_combo)
 
@@ -51,39 +50,8 @@ class App(QWidget):
 ########################################  T E M E L    F O N K S İ Y O N L A R  ########################################
 
     def update_terminal_codes(self, index):
-        operation_texts = [
-            r"İşlem Seç",
-            r"""Gri Dönüşüm
-
-Bu işlem, renkli bir görüntüyü gri tonlamalı bir görüntüye dönüştürür.
-
-Her pikselin kırmızı, yeşil ve mavi kanallarının ağırlıklı toplamını hesaplayarak bunu yapar. Kullanılan formül:
-
-    `0.2989 * R + 0.587 * G + 0.114 * B`.
-""",
-            r"""Histogram Germe
-
-Bu işlem, görüntüdeki piksel yoğunluklarını belirli bir aralığa gererek kontrastı arttırmayı amaçlar.
-
-İlk olarak, görüntüdeki minimum ve maksimum yoğunluk değerleri (c ve d) bulunur. Daha sonra, bu değerler arasındaki yoğunlukları, belirtilen aralığa (genellikle 0 ile 255 arasında) yerleştirmek için bir dönüşüm yapılır.
-
-Formül şu şekildedir:
-
-    P_{çıkış} = (P_{giriş} - c) * ((b - a) / (d - c)) + a
-
-Burada:
-- P_{giriş}: Giriş piksel değeri,
-- P_{çıkış}: Çıkış piksel değeri,
-- c ve d: Görüntüdeki minimum ve maksimum yoğunluk değerleri,
-- a ve b: Çıkış aralığının minimum ve maksimum değerleri (genellikle 0 ve 255).
-
-Sonuçta, kontrastı artırılmış ve daha geniş bir yoğunluk aralığına yayılmış bir görüntü elde edilir.
-""",
-            r"""Histogram Genişletme
-
-gerekli bilgiler...
-""",
-        ]
+        operation_texts = all_operation_texts.operation_texts
+        
         if index == 0:
             self.terminal_codes.clear()
             self.terminal_codes.setTextColor(red_color)
@@ -94,7 +62,7 @@ gerekli bilgiler...
             self.terminal_codes.append(operation_texts[index])
             
     def upload_image(self):
-        file_name = "result\image2.jpg"
+        file_name = "result\image.jpg"
         if file_name:
             self.image = cv2.imread(file_name)
             self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
@@ -117,22 +85,8 @@ gerekli bilgiler...
                 self.terminal_codes.clear()
                 self.terminal_codes.setTextColor(red_color)
                 self.terminal_codes.append("Please select an operation.")
-                
-            elif operation == 'Gray Conversion':
-                gray_image = self.convert_to_gray(self.image)
-                self.terminal_codes.clear()
-                self.download_image(gray_image)
-                self.terminal_codes.setTextColor(green_color)
-                self.terminal_codes.append("Gray Conversion operation was applied.")
-                
-            elif operation == 'Histogram Stretching':
-                stretched_image = self.histogram_stretching(self.image)
-                self.terminal_codes.clear()
-                self.download_image(stretched_image)
-                self.terminal_codes.setTextColor(green_color)
-                self.terminal_codes.append("Histogram Stretching operation was applied.")
 
-            elif operation == 'Histogram Widening':
+            elif operation == 'Contrast Boosting':
                 # kodlar
                 pass
 
@@ -148,13 +102,7 @@ gerekli bilgiler...
             self.terminal_codes.append("Please apply an operation first before downloading the image.")
             return
         
-        if self.operation_combo.currentText() == 'Gray Conversion':
-            image = QPixmap.fromImage(QImage(image, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Histogram Stretching':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Histogram Widening':
+        elif self.operation_combo.currentText() == 'Contrast Boosting':
             # kodlar
             pass
 
@@ -164,29 +112,7 @@ gerekli bilgiler...
         
 ######################################## O P E R A S Y O N L A R ########################################
     
-    def convert_to_gray(self, image):
-        gray_image = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
-        for i in range(image.shape[0]):
-            for j in range(image.shape[1]):
-                gray_image[i, j] = int(0.2989 * image[i, j, 2] + 0.587 * image[i, j, 1] + 0.114 * image[i, j, 0])
-        return gray_image
-    
-    def histogram_stretching(self, image):
-        if len(image.shape) == 3:
-            gray = self.convert_to_gray(image)
-        else:
-            gray = image
-
-        c = np.min(gray)
-        d = np.max(gray)
-        a, b = 0, 255
-
-        stretched = (gray - c) * ((b - a) / (d - c)) + a
-        stretched = np.clip(stretched, 0, 255).astype(np.uint8)
-
-        return stretched
-    
-    def histogram_widening(self, image):
+    def contrast_boosting(self, image):
         # kodlar
         pass
 

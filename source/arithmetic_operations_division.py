@@ -42,7 +42,7 @@ class App(QWidget):
         self.operation_combo.addItem('Histogram Stretching')
         self.operation_combo.addItem('Histogram Widening')
         self.operation_combo.addItem('Arithmetic Operations Addition')
-        self.operation_combo.addItem('Contrast Increase/Decrease')
+        self.operation_combo.addItem('Arithmetic Operations Division')
         
         self.layout.addWidget(self.operation_combo)
 
@@ -73,7 +73,7 @@ class App(QWidget):
             self.terminal_codes.append(operation_texts[index])
             
     def upload_image(self):
-        file_name = "result\image1.jpg"
+        file_name = "result\image4.jpg"
         if file_name:
             self.image = cv2.imread(file_name)
             self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
@@ -206,14 +206,14 @@ class App(QWidget):
                 self.terminal_codes.setTextColor(green_color)
                 self.terminal_codes.append("Addition operation applied successfully.")
 
-            elif operation == 'Contrast Increase/Decrease':
-                contrast_value, ok = QInputDialog.getDouble(self, 'Contrast Count', 'Enter contrast count (default=1,0):')
-                if ok:
-                    enhanced_image = self.contrast_increase_decrease(self.image, alpha=contrast_value, beta=0)
-                    self.terminal_codes.clear()
-                    self.download_image(enhanced_image)
-                    self.terminal_codes.setTextColor(green_color)
-                    self.terminal_codes.append(f"Contrast boosting applied with alpha={contrast_value} successfully.")
+
+            elif operation == 'Arithmetic Operations Division':
+                background = self.opening(self.image, kernel_size=11)
+                image = self.arithmetic_operations_division(self.image, background)
+                self.terminal_codes.clear()
+                self.download_image(image)
+                self.terminal_codes.setTextColor(green_color)
+                self.terminal_codes.append("Division operation applied successfully.")
 
         except Exception as e:
             self.terminal_codes.append("Error occurred while applying '{}' operation:\n\n{}".format(operation, str(e)))
@@ -259,9 +259,10 @@ class App(QWidget):
         elif self.operation_combo.currentText() == 'Arithmetic Operations Addition':
             image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
             image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Contrast Increase/Decrease':
+        elif self.operation_combo.currentText() == 'Arithmetic Operations Division':
             image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
             image.save(r"result\result.png", "PNG")
+
 
         self.terminal_codes.clear()
         self.terminal_codes.setTextColor(green_color)
@@ -486,10 +487,55 @@ class App(QWidget):
 
         return result
     
-    def contrast_increase_decrease(self, image, alpha=1.0, beta=0):
-        image_float = image.astype(np.float32)
-        result = alpha * (image_float - 128) + 128 + beta
-        result = np.clip(result, 0, 255).astype(np.uint8)
+    def get_elliptical_kernel(self, size):
+        radius = size // 2
+        kernel = np.zeros((size, size), dtype=np.uint8)
+        for i in range(size):
+            for j in range(size):
+                if ((i - radius) ** 2) / (radius ** 2) + ((j - radius) ** 2) / (radius ** 2) <= 1:
+                    kernel[i, j] = 1
+        return kernel
+    
+    def erosion(self, image, kernel):
+        pad_size = kernel.shape[0] // 2
+        padded_image = np.pad(image, ((pad_size, pad_size), (pad_size, pad_size), (0,0)), mode='edge')
+        result = np.zeros_like(image)
+
+        for y in range(image.shape[0]):
+            for x in range(image.shape[1]):
+                for c in range(3):  # RGB kanalları
+                    region = padded_image[y:y+kernel.shape[0], x:x+kernel.shape[1], c]
+                    result[y, x, c] = np.min(region[kernel == 1])
+        return result
+
+    def dilation(self, image, kernel):
+        pad_size = kernel.shape[0] // 2
+        padded_image = np.pad(image, ((pad_size, pad_size), (pad_size, pad_size), (0,0)), mode='edge')
+        result = np.zeros_like(image)
+
+        for y in range(image.shape[0]):
+            for x in range(image.shape[1]):
+                for c in range(3):  # RGB
+                    region = padded_image[y:y+kernel.shape[0], x:x+kernel.shape[1], c]
+                    result[y, x, c] = np.max(region[kernel == 1])
+        return result
+    
+    def opening(self, image, kernel_size=11):
+        kernel = self.get_elliptical_kernel(kernel_size)
+        eroded = self.erosion(image, kernel)
+        opened = self.dilation(eroded, kernel)
+        return opened
+
+    def arithmetic_operations_division(self, image1, image2):
+        if image1.shape != image2.shape:
+            raise ValueError("Images must be the same size for division.")
+
+        image1_float = image1.astype(np.float32) + 1  # +1 to prevent zero division
+        image2_float = image2.astype(np.float32) + 1
+
+        result = image1_float / image2_float
+        result = np.clip(result * 128, 0, 255).astype(np.uint8)  # scale for visibility
+
         return result
 
 
