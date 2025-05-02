@@ -176,4 +176,8 @@ r"""Filtre (Median)
 
 bilgiler...
 """,
+r"""Filtre (Unsharp)
+
+bilgiler...
+""",
 ]

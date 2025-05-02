@@ -50,6 +50,7 @@ class App(QWidget):
         self.operation_combo.addItem('Add Noise (Salt & Pepper)')
         self.operation_combo.addItem('Filter Mean')
         self.operation_combo.addItem('Filter Median')
+        self.operation_combo.addItem('Filter Unsharp')
         
         self.layout.addWidget(self.operation_combo)
 
@@ -275,6 +276,13 @@ class App(QWidget):
                 self.terminal_codes.setTextColor(green_color)
                 self.terminal_codes.append(f"Median filter applied successfully.")
 
+            elif operation == 'Filter Unsharp':
+                image = self.filter_unsharp(self.image)
+                self.terminal_codes.clear()
+                self.download_image(image)
+                self.terminal_codes.setTextColor(green_color)
+                self.terminal_codes.append(f"Unsharp filter applied successfully.")
+
         except Exception as e:
             self.terminal_codes.append("Error occurred while applying '{}' operation:\n\n{}".format(operation, str(e)))
         finally:
@@ -342,6 +350,9 @@ class App(QWidget):
             image.save(r"result\result.png", "PNG")
         elif self.operation_combo.currentText() == 'Filter Median':
             image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
+            image.save(r"result\result.png", "PNG")
+        elif self.operation_combo.currentText() == 'Filter Unsharp':
+            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
             image.save(r"result\result.png", "PNG")
 
         self.terminal_codes.clear()
@@ -713,6 +724,32 @@ class App(QWidget):
 
                         result[y, x, c] = int(median_value)
         return result
+
+    def filter_unsharp(self, image, amount=1.0):
+        if len(image.shape) == 3:
+            image_gray = self.convert_to_gray(image)
+        else:
+            image_gray = image
+
+        image_gray = image_gray.astype(np.float32)
+
+        kernel = np.ones((3, 3), dtype=np.float32) / 9.0
+        padded = np.pad(image_gray, ((1, 1), (1, 1)), mode='reflect')
+        blurred = np.zeros_like(image_gray)
+
+        height, width = image_gray.shape
+
+        for y in range(1, height + 1):
+            for x in range(1, width + 1):
+                region = padded[y-1:y+2, x-1:x+2]
+                blurred[y-1, x-1] = np.sum(region * kernel)
+
+        mask = image_gray - blurred
+
+        sharpened = image_gray + amount * mask
+
+        sharpened = np.clip(sharpened, 0, 255).astype(np.uint8)
+        return sharpened
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
