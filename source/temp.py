@@ -47,6 +47,9 @@ class App(QWidget):
         self.operation_combo.addItem('Convolution Operation Mean')
         self.operation_combo.addItem('Thresholding')
         self.operation_combo.addItem('Edge Detection Prewitt')
+        self.operation_combo.addItem('Add Noise (Salt & Pepper)')
+        self.operation_combo.addItem('Filter Mean')
+        self.operation_combo.addItem('Filter Median')
         
         self.layout.addWidget(self.operation_combo)
 
@@ -251,6 +254,27 @@ class App(QWidget):
                 self.terminal_codes.setTextColor(green_color)
                 self.terminal_codes.append("Edge Detection Prewitt operation was applied.")
 
+            elif operation == 'Add Noise (Salt & Pepper)':
+                image = self.add_noise_salt_and_pepper(self.image)
+                self.terminal_codes.clear()
+                self.download_image(image)
+                self.terminal_codes.setTextColor(green_color)
+                self.terminal_codes.append(f"Salt & Pepper noise added.")
+
+            elif operation == 'Filter Mean':
+                image = self.filter_mean(self.image)
+                self.terminal_codes.clear()
+                self.download_image(image)
+                self.terminal_codes.setTextColor(green_color)
+                self.terminal_codes.append(f"Mean filter applied successfully.")
+
+            elif operation == 'Filter Median':
+                image = self.filter_median(self.image)
+                self.terminal_codes.clear()
+                self.download_image(image)
+                self.terminal_codes.setTextColor(green_color)
+                self.terminal_codes.append(f"Median filter applied successfully.")
+
         except Exception as e:
             self.terminal_codes.append("Error occurred while applying '{}' operation:\n\n{}".format(operation, str(e)))
         finally:
@@ -309,6 +333,15 @@ class App(QWidget):
             image.save(r"result\result.png", "PNG")
         elif self.operation_combo.currentText() == 'Edge Detection Prewitt':
             image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
+            image.save(r"result\result.png", "PNG")
+        elif self.operation_combo.currentText() == 'Add Noise (Salt & Pepper)':
+            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
+            image.save(r"result\result.png", "PNG")
+        elif self.operation_combo.currentText() == 'Filter Mean':
+            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
+            image.save(r"result\result.png", "PNG")
+        elif self.operation_combo.currentText() == 'Filter Median':
+            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
             image.save(r"result\result.png", "PNG")
 
         self.terminal_codes.clear()
@@ -605,6 +638,80 @@ class App(QWidget):
                 gradient = min(int(np.sqrt(gx ** 2 + gy ** 2)), 255)
                 result[i - 1, j - 1] = gradient
 
+        return result
+
+    def add_noise_salt_and_pepper(self, image):
+        amount=0.05
+
+        output = np.copy(image)
+        row, col = output.shape[:2]
+        num_pixels = row * col
+
+        num_salt = int(num_pixels * amount / 2)
+        num_pepper = int(num_pixels * amount / 2)
+
+        for _ in range(num_salt):
+            i = np.random.randint(0, row)
+            j = np.random.randint(0, col)
+            if len(output.shape) == 2:
+                output[i, j] = 255
+            else:
+                output[i, j] = [255, 255, 255]
+
+        for _ in range(num_pepper):
+            i = np.random.randint(0, row)
+            j = np.random.randint(0, col)
+            if len(output.shape) == 2:
+                output[i, j] = 0
+            else:
+                output[i, j] = [0, 0, 0]
+
+        return output
+
+    def filter_mean(self, image):
+        image = self.add_noise_salt_and_pepper(image)
+
+        height, width, channels = image.shape
+        padded_image = np.pad(image, ((1, 1), (1, 1), (0, 0)), mode='reflect')
+        result = np.copy(image)
+
+        for y in range(height):
+            for x in range(width):
+                for c in range(channels):
+                    pixel_value = image[y, x, c]
+                    if pixel_value == 0 or pixel_value == 255:
+                        neighborhood = padded_image[y:y+3, x:x+3, c]
+                        valid_neighbors = neighborhood[(neighborhood != 0) & (neighborhood != 255)]
+
+                        if valid_neighbors.size > 0:
+                            mean_value = np.mean(valid_neighbors)
+                        else:
+                            mean_value = np.mean(neighborhood)
+
+                        result[y, x, c] = int(mean_value)
+        return result
+    
+    def filter_median(self, image):
+        image = self.add_noise_salt_and_pepper(image)
+
+        height, width, channels = image.shape
+        padded_image = np.pad(image, ((1, 1), (1, 1), (0, 0)), mode='reflect')
+        result = np.copy(image)
+
+        for y in range(height):
+            for x in range(width):
+                for c in range(channels):
+                    pixel_value = image[y, x, c]
+                    if pixel_value == 0 or pixel_value == 255:
+                        neighborhood = padded_image[y:y+3, x:x+3, c]
+                        valid_neighbors = neighborhood[(neighborhood != 0) & (neighborhood != 255)]
+
+                        if valid_neighbors.size > 0:
+                            median_value = np.median(valid_neighbors)
+                        else:
+                            median_value = np.median(neighborhood)
+
+                        result[y, x, c] = int(median_value)
         return result
 
 if __name__ == '__main__':

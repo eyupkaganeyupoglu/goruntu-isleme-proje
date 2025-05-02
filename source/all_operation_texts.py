@@ -164,4 +164,16 @@ r"""Kenar Tespiti Prewitt
 
 bilgiler...
 """,
+r"""Gürültü Ekleme (Salt & Pepper)
+
+bilgiler...
+""",
+r"""Filtre (Mean)
+
+bilgiler...
+""",
+r"""Filtre (Median)
+
+bilgiler...
+""",
 ]
