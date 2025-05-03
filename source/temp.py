@@ -9,7 +9,6 @@ import all_operation_texts
 red_color = QColor(204, 0, 0)
 green_color = QColor(0, 153, 0)
 blue_color = QColor(0, 102, 255)
-black_color = QColor(0, 0, 0)
 
 class App(QWidget):
     def __init__(self):
@@ -59,7 +58,7 @@ class App(QWidget):
         self.layout.addWidget(self.operation_combo)
 
         self.apply_button = QPushButton('Apply and Download', self)
-        self.apply_button.clicked.connect(self.apply_operation)
+        self.apply_button.clicked.connect(self.apply_and_download_operation)
         self.layout.addWidget(self.apply_button)
 
         self.setLayout(self.layout)
@@ -83,34 +82,32 @@ class App(QWidget):
             self.terminal_codes.clear()
             self.terminal_codes.setTextColor(blue_color)
             self.terminal_codes.append(operation_texts[index])
-            
-    def upload_image(self):
-        # file_name = "result\image1.jpg"
-        # if file_name:
-        #     self.image = cv2.imread(file_name)
-        #     self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-        #     self.terminal_codes.clear()
-        #     self.terminal_codes.setTextColor(green_color)
-        #     self.terminal_codes.append("Source image uploaded.")
 
+    def load_image(self):
         try:
             file_name, _ = QFileDialog.getOpenFileName(self, 'Open Image', '', 'Image Files (*.jpg *.png)')
-            if file_name:
-                self.image = cv2.imread(file_name)
-                self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-                self.terminal_codes.clear()
-                self.terminal_codes.setTextColor(green_color)
-                self.terminal_codes.append("Source image uploaded.")
+            if not file_name:
+                return None
+            image = cv2.imread(file_name)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            self.terminal_codes.setTextColor(green_color)
+            self.terminal_codes.clear()
+            self.terminal_codes.append("Loaded image successfully.")
+            return image
         except Exception as e:
             self.terminal_codes.clear()
             self.terminal_codes.setTextColor(red_color)
-            self.terminal_codes.append("Error occurred while uploading image: {}".format(str(e)))
-            self.terminal_codes.setTextColor(blue_color)
-            self.terminal_codes.append("An error may occur when the path where the image is located does not conform to ASCII standards. Use a path that does not contain Turkish characters.\n\nMake sure that the image you want to upload is in JPG or PNG format.")
-        finally:
-            pass
+            self.terminal_codes.append(f"Error load_image: {e}")
+            return None
+
+    def upload_image(self):
+        image = self.load_image()
+        if image is not None:
+            self.image = image
+            self.terminal_codes.setTextColor(green_color)
+            self.terminal_codes.append("Source image uploaded.")
     
-    def apply_operation(self):
+    def apply_and_download_operation(self):
         
         if self.image is None:
             self.terminal_codes.clear()
@@ -152,7 +149,7 @@ class App(QWidget):
                         rotated_image = self.rotate_image(self.image, angle)
                         self.download_image(rotated_image)
                         self.terminal_codes.setTextColor(green_color)
-                        self.terminal_codes.append("Rotation angle:{}\nImage Rotation operation was applied.".format(angle))
+                        self.terminal_codes.append(f"Rotation angle: {angle}\nImage Rotation operation was applied.")
 
             elif operation == 'Image Cropping':
                 x1, ok = QInputDialog.getInt(self, 'Image Cropping', f'Enter x1 ({self.image.shape[1]}):')
@@ -168,7 +165,7 @@ class App(QWidget):
                                 if cropped_image is not None:
                                     self.download_image(cropped_image)
                                     self.terminal_codes.setTextColor(green_color)
-                                    self.terminal_codes.append("Image Cropping operation was applied.")
+                                    self.terminal_codes.append(f"Cropped\n{x1} → {x2}\n↓\n{y2}\nImage Cropping operation was applied.")
                                 else:
                                     if  x1 > self.image.shape[1] or y1 > self.image.shape[0] or x2 > self.image.shape[1] or y2 > self.image.shape[0]:
                                         self.terminal_codes.setTextColor(red_color)
@@ -187,7 +184,7 @@ class App(QWidget):
                     self.terminal_codes.setTextColor(blue_color)
                     zoomed = self.zoom_in_image(self.image, int(zoom_value))
                     self.download_image(zoomed)
-                    self.terminal_codes.append("Image zoomed in with a ratio of " + zoom_value + ".")
+                    self.terminal_codes.append(f"{zoom_value}x zoom in applied.\nImage Zoom in operation was applied.")
 
             elif operation == 'Image Zoom out':
                 zoom_value, ok = QInputDialog.getItem(self, "Zoom Value", "Select Zoom Value", ['2','4'], 0, False)
@@ -196,7 +193,7 @@ class App(QWidget):
                     self.terminal_codes.setTextColor(blue_color)
                     zoomed = self.zoom_out_image(self.image, int(zoom_value))
                     self.download_image(zoomed)
-                    self.terminal_codes.append("Image zoomed out with a ratio of " + zoom_value + ".")
+                    self.terminal_codes.append(f"{zoom_value}x zoom out applied.\nImage Zoom out operation was applied.")
 
             elif operation == 'RGB to NTSC':
                 image = self.convert_rgb_to_ntsc(self.image)
@@ -227,73 +224,50 @@ class App(QWidget):
                 self.terminal_codes.append("Histogram Widening operation was applied.")
 
             elif operation == 'Arithmetic Operations Addition':
-                try:
-                    file_name, _ = QFileDialog.getOpenFileName(self, 'Open Image', '', 'Image Files (*.jpg *.png)')
-                    if file_name:
-                        image2 = cv2.imread(file_name)
-                        image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2RGB)
-                        image = self.arithmetic_operations_addition(self.image, image2)
-                        self.terminal_codes.clear()
-                        self.terminal_codes.setTextColor(green_color)
-                        self.terminal_codes.append("Addition operation applied successfully.")
-                        self.download_image(image)
-                    else:
-                        raise ValueError("No image file selected.")
-                except Exception as e:
-                    self.terminal_codes.clear()
-                    self.terminal_codes.setTextColor(red_color)
-                    self.terminal_codes.append(f"Error occurred while uploading image: {str(e)}")
-                    self.terminal_codes.setTextColor(blue_color)
-                    self.terminal_codes.append("An error may occur when the path where the image is located does not conform to ASCII standards. Use a path that does not contain Turkish characters.\n\nMake sure that the image you want to upload is in JPG or PNG format.")
-                finally:
-                    pass
+                image2 = self.load_image()
+                image = self.arithmetic_operations_addition(self.image, image2)
+                self.terminal_codes.clear()
+                self.download_image(image)
+                self.terminal_codes.setTextColor(green_color)
+                self.terminal_codes.append("Arithmetic Operations Addition operation was applied.")
 
             elif operation == 'Arithmetic Operations Division':
-                try:
-                    file_name, _ = QFileDialog.getOpenFileName(self, 'Open Image', '', 'Image Files (*.jpg *.png)')
-                    if file_name:
-                        image2 = cv2.imread(file_name)
-                        image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2RGB)
-                        image = self.arithmetic_operations_division(self.image, image2)
-                        self.terminal_codes.clear()
-                        self.terminal_codes.setTextColor(green_color)
-                        self.terminal_codes.append("Division operation applied successfully.")
-                        self.download_image(image)
-                    else:
-                        raise ValueError("No image file selected.")
-                except Exception as e:
-                    self.terminal_codes.clear()
-                    self.terminal_codes.setTextColor(red_color)
-                    self.terminal_codes.append(f"Error occurred while uploading image: {str(e)}")
-                    self.terminal_codes.setTextColor(blue_color)
-                    self.terminal_codes.append("An error may occur when the path where the image is located does not conform to ASCII standards. Use a path that does not contain Turkish characters.\n\nMake sure that the image you want to upload is in JPG or PNG format.")
-                finally:
-                    pass
+                image2 = self.load_image()
+                image = self.arithmetic_operations_division(self.image, image2)
+                self.terminal_codes.clear()
+                self.download_image(image)
+                self.terminal_codes.setTextColor(green_color)
+                self.terminal_codes.append("Arithmetic Operations Division operation was applied.")
 
             elif operation == 'Contrast Increase/Decrease':
-                contrast_value, ok = QInputDialog.getDouble(self, 'Contrast Count', 'Enter contrast count (default=1,0):')
+                contrast_value, ok = QInputDialog.getDouble(self, 'Contrast Count', 'Enter contrast count (default:1,0):')
                 if ok:
                     enhanced_image = self.contrast_increase_decrease(self.image, alpha=contrast_value, beta=0)
                     self.terminal_codes.clear()
                     self.download_image(enhanced_image)
                     self.terminal_codes.setTextColor(green_color)
-                    self.terminal_codes.append(f"Contrast boosting applied with alpha={contrast_value} successfully.")
+                    if contrast_value > 1:
+                        self.terminal_codes.append(f"Alpha: {contrast_value}\nContrast Increase operation was applied.")
+                    elif contrast_value < 1:
+                        self.terminal_codes.append(f"Alpha: {contrast_value}\nContrast Decrease operation was applied.")
+                    else:
+                        self.terminal_codes.append(f"Alpha: {contrast_value}\nNo contrast change was applied.")
 
             elif operation == 'Convolution Operation Mean':
                 image = self.convolution_operation_mean(self.image)
                 self.terminal_codes.clear()
                 self.download_image(image)
                 self.terminal_codes.setTextColor(green_color)
-                self.terminal_codes.append("Convolution (Mean Filter) applied successfully.")
+                self.terminal_codes.append("Convolution Operation Mean operation was applied.")
 
             elif operation == 'Thresholding':
-                threshold_value, ok = QInputDialog.getInt(self, 'Threshold Value', 'Enter threshold value (0-255, default=127):')
+                threshold_value, ok = QInputDialog.getInt(self, 'Threshold Value', 'Enter threshold value (0-255, default:127):')
                 if ok:
                     image = self.thresholding(self.image, threshold=threshold_value)
                     self.terminal_codes.clear()
                     self.download_image(image)
                     self.terminal_codes.setTextColor(green_color)
-                    self.terminal_codes.append(f"Thresholding applied successfully with threshold={threshold_value}.")
+                    self.terminal_codes.append(f"Threshold: {threshold_value}\nTrasholding operation was applied.")
 
             elif operation == 'Edge Detection Prewitt':
                 image = self.edge_detection_prewitt(self.image)
@@ -307,56 +281,58 @@ class App(QWidget):
                 self.terminal_codes.clear()
                 self.download_image(image)
                 self.terminal_codes.setTextColor(green_color)
-                self.terminal_codes.append(f"Salt & Pepper noise added.")
+                self.terminal_codes.append("Added noise (Salt & Pepper) operation was applied.")
 
             elif operation == 'Filter Mean':
                 image = self.filter_mean(self.image)
                 self.terminal_codes.clear()
                 self.download_image(image)
                 self.terminal_codes.setTextColor(green_color)
-                self.terminal_codes.append(f"Mean filter applied successfully.")
+                self.terminal_codes.append("Filter Mean operation was applied.")
 
             elif operation == 'Filter Median':
                 image = self.filter_median(self.image)
                 self.terminal_codes.clear()
                 self.download_image(image)
                 self.terminal_codes.setTextColor(green_color)
-                self.terminal_codes.append(f"Median filter applied successfully.")
+                self.terminal_codes.append("Filter Median operation was applied.")
 
             elif operation == 'Filter Unsharp':
-                image = self.filter_unsharp(self.image)
-                self.terminal_codes.clear()
-                self.download_image(image)
-                self.terminal_codes.setTextColor(green_color)
-                self.terminal_codes.append(f"Unsharp filter applied successfully.")
+                amount_value, ok = QInputDialog.getDouble(self, 'Unsharp Amount', 'Enter unsharp amount (default:1,0, No Effect:0,0):')
+                if ok:
+                    image = self.filter_unsharp(self.image, amount=amount_value)
+                    self.terminal_codes.clear()
+                    self.download_image(image)
+                    self.terminal_codes.setTextColor(green_color)
+                    self.terminal_codes.append("Filter Unsharp operation was applied.")
 
             elif operation == 'Morphological Operations Dilation':
                 image = self.morphological_operations_dilation(self.image)
                 self.terminal_codes.clear()
                 self.download_image(image)
                 self.terminal_codes.setTextColor(green_color)
-                self.terminal_codes.append(f"Dilation operation applied successfully.")
+                self.terminal_codes.append("Morphological Operations Dilation operation was applied.")
 
             elif operation == 'Morphological Operations Erosion':
                 image = self.morphological_operations_erosion(self.image)
                 self.terminal_codes.clear()
                 self.download_image(image)
                 self.terminal_codes.setTextColor(green_color)
-                self.terminal_codes.append(f"Erosion operation applied successfully.")
+                self.terminal_codes.append("Morphological Operations Erosion operation was applied.")
 
             elif operation == 'Morphological Operations Opening':
                 image = self.morphological_operations_opening(self.image)
                 self.terminal_codes.clear()
                 self.download_image(image)
                 self.terminal_codes.setTextColor(green_color)
-                self.terminal_codes.append(f"Opening operation applied successfully.")
+                self.terminal_codes.append("Morphological Operations Opening operation was applied.")
 
             elif operation == 'Morphological Operations Closing':
                 image = self.morphological_operations_closing(self.image)
                 self.terminal_codes.clear()
                 self.download_image(image)
                 self.terminal_codes.setTextColor(green_color)
-                self.terminal_codes.append(f"Closing operation applied successfully.")
+                self.terminal_codes.append("Morphological Operations Closing operation was applied.")
 
         except Exception as e:
             self.terminal_codes.append("Error occurred while applying '{}' operation:\n\n{}".format(operation, str(e)))
@@ -370,77 +346,37 @@ class App(QWidget):
             self.terminal_codes.append("Please apply an operation first before downloading the image.")
             return
         
-        if self.operation_combo.currentText() == 'Gray Conversion':
-            image = QPixmap.fromImage(QImage(image, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
+        if self.operation_combo.currentText() in ['Gray Conversion',
+                                                  'Binary Conversion',
+                                                  'Histogram Stretching',
+                                                  'Histogram Widening',
+                                                  'Thresholding',
+                                                  'Edge Detection Prewitt',
+                                                  'Filter Unsharp',
+                                                  'Morphological Operations Dilation',
+                                                  'Morphological Operations Erosion',
+                                                  'Morphological Operations Opening',
+                                                  'Morphological Operations Closing']:
+            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
             image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Binary Conversion':
-            image = QPixmap.fromImage(QImage(image, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
+
+        elif self.operation_combo.currentText() in ['Image Rotation', 
+                                                    'Image Zoom in',
+                                                    'Image Zoom out',
+                                                    'RGB to NTSC',
+                                                    'RGB to YCbCr',
+                                                    'Arithmetic Operations Addition',
+                                                    'Arithmetic Operations Division',
+                                                    'Contrast Increase/Decrease',
+                                                    'Convolution Operation Mean',
+                                                    'Add Noise (Salt & Pepper)',
+                                                    'Filter Mean',
+                                                    'Filter Median']:
+            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
             image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Image Rotation':
-            image = QPixmap.fromImage(QImage(image, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
-            image.save(r"result\result.png", "PNG")
+
         elif self.operation_combo.currentText() == 'Image Cropping':
             cv2.imwrite(r"result\result.png", cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        elif self.operation_combo.currentText() == 'Image Zoom in':
-            image = QPixmap.fromImage(QImage(image, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Image Zoom out':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'RGB to NTSC':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'RGB to YCbCr':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Histogram Stretching':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Histogram Widening':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Arithmetic Operations Addition':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Arithmetic Operations Division':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Contrast Increase/Decrease':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Convolution Operation Mean':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Thresholding':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Edge Detection Prewitt':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Add Noise (Salt & Pepper)':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Filter Mean':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Filter Median':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_RGB888))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Filter Unsharp':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Morphological Operations Dilation':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Morphological Operations Erosion':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Morphological Operations Opening':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
-            image.save(r"result\result.png", "PNG")
-        elif self.operation_combo.currentText() == 'Morphological Operations Closing':
-            image = QPixmap.fromImage(QImage(image.data, image.shape[1], image.shape[0], image.strides[0], QImage.Format_Grayscale8))
-            image.save(r"result\result.png", "PNG")
 
         self.terminal_codes.clear()
         self.terminal_codes.setTextColor(green_color)
@@ -456,46 +392,33 @@ class App(QWidget):
         return gray_image
 
     def convert_to_binary(self, image, threshold=128):
-        gray_image = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
-        for i in range(image.shape[0]):
-            for j in range(image.shape[1]):
-                gray = int(0.2989 * image[i, j, 2] + 0.587 * image[i, j, 1] + 0.114 * image[i, j, 0])
-                if gray < threshold:
-                    gray_image[i, j] = 0
-                else:
-                    gray_image[i, j] = 255
-        return gray_image
+        gray_image = self.convert_to_gray(image)
+        binary_image = np.zeros((gray_image.shape[0], gray_image.shape[1]), dtype=np.uint8)
+        for i in range(gray_image.shape[0]):
+            for j in range(gray_image.shape[1]):
+                binary_image[i, j] = 255 if gray_image[i, j] >= threshold else 0
+        return binary_image
 
-    def bounding_box(self, image, angle):
-        (h, w) = image.shape[:2]
+    def rotate_image(self, image, angle):
+        if angle in (0, 360, -360):
+            return image
         
+        (h, w) = image.shape[:2]
+            
         rad = np.deg2rad(angle)
         new_w = int(np.ceil(w * np.abs(np.sin(rad)) + h * np.abs(np.cos(rad))))
         new_h = int(np.ceil(h * np.abs(np.sin(rad)) + w * np.abs(np.cos(rad))))
-        rotated = np.zeros((new_h, new_w, 3), dtype=np.uint8)
-        
-        return rotated
+        bounding_box_image = np.zeros((new_h, new_w, 3), dtype=np.uint8)
 
-    def place_image_in_bounding_box(self, image, angle):
-        rotated = self.bounding_box(image, angle)
-        
         (h, w) = image.shape[:2]
-        (new_h, new_w) = rotated.shape[:2]
+        (new_h, new_w) = bounding_box_image.shape[:2]
         center_x = new_w // 2
         center_y = new_h // 2
 
         start_x = center_x - w // 2
         start_y = center_y - h // 2
 
-        rotated[start_y:start_y+h, start_x:start_x+w] = image
-        
-        return rotated
-
-    def rotate_image(self, image, angle):
-        if angle in (0, 360, -360):
-            return image
-        
-        bounding_box_image = self.place_image_in_bounding_box(image, angle)
+        bounding_box_image[start_y:start_y+h, start_x:start_x+w] = image
             
         (h, w) = bounding_box_image.shape[:2]
         center = (w // 2, h // 2)
@@ -523,7 +446,10 @@ class App(QWidget):
                     c = 1 - a
                     d = 1 - b
                     for channel in range(3):
-                        rotated[i, j, channel] = (c * d * bounding_box_image[y0, x0, channel] + a * d * bounding_box_image[y0, x1, channel] + c * b * bounding_box_image[y1, x0, channel] + a * b * bounding_box_image[y1, x1, channel])
+                        rotated[i, j, channel] = (c * d * bounding_box_image[y0, x0, channel] +
+                                                  a * d * bounding_box_image[y0, x1, channel] +
+                                                  c * b * bounding_box_image[y1, x0, channel] +
+                                                  a * b * bounding_box_image[y1, x1, channel])
         return rotated
     
     def crop_image(self, image, x1, y1, x2, y2):
@@ -822,27 +748,12 @@ class App(QWidget):
         return result
 
     def filter_unsharp(self, image, amount=1.0):
-        if len(image.shape) == 3:
-            image_gray = self.convert_to_gray(image)
-        else:
-            image_gray = image
+        blurred_color = self.convolution_operation_mean(image)
+        blurred_gray = self.convert_to_gray(blurred_color).astype(np.float32)
+        original_gray = self.convert_to_gray(image).astype(np.float32)
 
-        image_gray = image_gray.astype(np.float32)
-
-        kernel = np.ones((3, 3), dtype=np.float32) / 9.0
-        padded = np.pad(image_gray, ((1, 1), (1, 1)), mode='reflect')
-        blurred = np.zeros_like(image_gray)
-
-        height, width = image_gray.shape
-
-        for y in range(1, height + 1):
-            for x in range(1, width + 1):
-                region = padded[y-1:y+2, x-1:x+2]
-                blurred[y-1, x-1] = np.sum(region * kernel)
-
-        mask = image_gray - blurred
-
-        sharpened = image_gray + amount * mask
+        mask = original_gray - blurred_gray
+        sharpened = original_gray + amount * mask
 
         sharpened = np.clip(sharpened, 0, 255).astype(np.uint8)
         return sharpened

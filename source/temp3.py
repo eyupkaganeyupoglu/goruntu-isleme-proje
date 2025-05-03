@@ -1,34 +1,27 @@
-    def convert_rgb_to_hsv(self, image):
-        hsv_image = np.zeros_like(image, dtype=np.uint8)
-        for i in range(image.shape[0]):
-            for j in range(image.shape[1]):
-                r, g, b = image[i, j] / 255.0
-                cmax = max(r, g, b)
-                cmin = min(r, g, b)
-                delta = cmax - cmin
+import numpy as np
 
-                if delta == 0:
-                    h = 0
-                elif cmax == r:
-                    h = (60 * ((g - b) / delta) + 360) % 360
-                elif cmax == g:
-                    h = (60 * ((b - r) / delta) + 120) % 360
-                else:
-                    h = (60 * ((r - g) / delta) + 240) % 360
+def filter_unsharp(self, image, amount=1.0):
+    if len(image.shape) == 3:
+        image_gray = self.convert_to_gray(image)
+    else:
+        image_gray = image
 
-                s = 0 if cmax == 0 else delta / cmax
-                v = cmax
+    image_gray = image_gray.astype(np.float32)
 
-                hsv_image[i, j] = [int(h / 2), int(s * 255), int(v * 255)]
-        return hsv_image
-    
-    def convert_rgb_to_ycbcr(self, image):
-        ycbcr_image = np.zeros_like(image, dtype=np.uint8)
-        for i in range(image.shape[0]):
-            for j in range(image.shape[1]):
-                r, g, b = image[i, j]
-                y  =  0.299 * r + 0.587 * g + 0.114 * b
-                cb = -0.168736 * r - 0.331264 * g + 0.5 * b + 128
-                cr =  0.5 * r - 0.418688 * g - 0.081312 * b + 128
-                ycbcr_image[i, j] = [int(y), int(cb), int(cr)]
-        return ycbcr_image
+    kernel = np.ones((3, 3), dtype=np.float32) / 9.0
+    padded = np.pad(image_gray, ((1, 1), (1, 1)), mode='reflect')
+    blurred = np.zeros_like(image_gray)
+
+    height, width = image_gray.shape
+
+    for y in range(1, height + 1):
+        for x in range(1, width + 1):
+            region = padded[y-1:y+2, x-1:x+2]
+            blurred[y-1, x-1] = np.sum(region * kernel)
+
+    mask = image_gray - blurred
+
+    sharpened = image_gray + amount * mask
+
+    sharpened = np.clip(sharpened, 0, 255).astype(np.uint8)
+    return sharpened
