@@ -1,0 +1,4 @@
+- Renk dönüşümlerini pdf'den tekrar yap.
+- image import işlemlerini manuelden çıkar.
+- Açıklamaları olmayanların açıklamasını ekle.
+- Açıklama başlıklarına hangi image'in import edileceğini yaz.

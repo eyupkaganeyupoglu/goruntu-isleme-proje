@@ -31,7 +31,6 @@ class App(QWidget):
 
         self.operation_combo = QComboBox(self)
         self.operation_combo.addItem('Select Operation')
-        self.operation_combo.addItem('Add Noise (Salt & Pepper)')
         
         self.layout.addWidget(self.operation_combo)
 
@@ -46,8 +45,6 @@ class App(QWidget):
         self.terminal_codes.append("Program is ready.")
         
         self.operation_combo.currentIndexChanged.connect(self.update_terminal_codes)
-        
-########################################  T E M E L    F O N K S İ Y O N L A R  ########################################
 
     def update_terminal_codes(self, index):
         operation_texts = all_operation_texts.operation_texts
@@ -62,13 +59,22 @@ class App(QWidget):
             self.terminal_codes.append(operation_texts[index])
             
     def upload_image(self):
-        file_name = "result\image.jpg"
-        if file_name:
-            self.image = cv2.imread(file_name)
-            self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+        try:
+            file_name, _ = QFileDialog.getOpenFileName(self, 'Open Image', '', 'Image Files (*.jpg *.png)')
+            if file_name:
+                self.image = cv2.imread(file_name)
+                self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+                self.terminal_codes.clear()
+                self.terminal_codes.setTextColor(green_color)
+                self.terminal_codes.append("Source image uploaded.")
+        except Exception as e:
             self.terminal_codes.clear()
-            self.terminal_codes.setTextColor(green_color)
-            self.terminal_codes.append("Source image uploaded.")
+            self.terminal_codes.setTextColor(red_color)
+            self.terminal_codes.append("Error occurred while uploading image: {}".format(str(e)))
+            self.terminal_codes.setTextColor(blue_color)
+            self.terminal_codes.append("An error may occur when the path where the image is located does not conform to ASCII standards. Use a path that does not contain Turkish characters.\n\nMake sure that the image you want to upload is in JPG or PNG format.")
+        finally:
+            pass
     
     def apply_operation(self):
         
@@ -86,10 +92,6 @@ class App(QWidget):
                 self.terminal_codes.setTextColor(red_color)
                 self.terminal_codes.append("Please select an operation.")
 
-            elif operation == 'Add Noise (Salt & Pepper)':
-                # kodlar
-                pass
-
         except Exception as e:
             self.terminal_codes.append("Error occurred while applying '{}' operation:\n\n{}".format(operation, str(e)))
         finally:
@@ -101,20 +103,10 @@ class App(QWidget):
             self.terminal_codes.setTextColor(red_color)
             self.terminal_codes.append("Please apply an operation first before downloading the image.")
             return
-        
-        elif self.operation_combo.currentText() == 'Add Noise (Salt & Pepper)':
-            # kodlar
-            pass
 
         self.terminal_codes.clear()
         self.terminal_codes.setTextColor(green_color)
         self.terminal_codes.append("Image downloaded as result.png.")
-        
-######################################## O P E R A S Y O N L A R ########################################
-    
-    def add_noise_salt_and_pepper(self):
-        # kodlar
-        pass
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

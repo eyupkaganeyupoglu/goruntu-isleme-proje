@@ -60,48 +60,13 @@ r"""Görüntü Uzaklaştırma
 
 Bu işlem, görüntünün En Yakın Komşu Enterpolasyonu ile uzaklaştırılmasını sağlar.
 """,
-r"""RGB'den HSV'ye Dönüşüm
+r"""RGB'den NTSC Dönüşüm
 
-Bu işlem, RGB (Kırmızı, Yeşil, Mavi) renk uzayındaki bir görüntüyü HSV (Ton, Doygunluk, Parlaklık) renk uzayına dönüştürmek için kullanılır.
-
-Dönüşüm şu adımlarla gerçekleştirilir:
-
-1. R, G, B renk değerleri 0 ile 1 arasında olacak şekilde normalize edilir (örneğin, 255 üzerinden gelen bir değer 255'e bölünür).
-
-2. R, G ve B değerleri arasındaki en büyük (maksimum) ve en küçük (minimum) değerler bulunur.
-
-3. Bu iki değer arasındaki fark (delta) hesaplanır.
-
-4. Ton (Hue) değeri şu kurallara göre hesaplanır:
-   - En büyük değer R ise, Ton = (G - B) / delta
-   - En büyük değer G ise, Ton = (B - R) / delta + 2
-   - En büyük değer B ise, Ton = (R - G) / delta + 4
-   - Sonuç 60 ile çarpılır. Eğer delta sıfırsa, Ton değeri sıfır alınır.
-
-5. Doygunluk (Saturation) şu şekilde hesaplanır:
-   - Eğer maksimum değer sıfırsa, doygunluk sıfırdır.
-   - Aksi halde, doygunluk = delta / maksimum değer
-
-6. Parlaklık (Value) doğrudan maksimum değer olarak alınır.
-
-Sonuçta, Ton 0 ile 360 derece arasında bir açı olarak ifade edilir.
-Doygunluk ve Parlaklık ise 0 ile 1 arasında değerler alır.
+Bu işlem, RGB renk uzayındaki bir görüntüyü NTSC (National Television System Committee) renk uzayına dönüştürür.
 """,
-r"""RGB'den YCbCr'ye Dönüşüm
+r"""RGB'den YCbCr Dönüşüm
 
-Bu işlem, RGB renk uzayındaki bir görüntüyü YCbCr (Parlaklık ve renk farkı bileşenleri) renk uzayına dönüştürmek için kullanılır. Dönüşüm için şu işlemler yapılır:
-
-1. R, G, B değerleri [0, 255] aralığında kabul edilir.
-
-2. Y, Cb ve Cr bileşenleri aşağıdaki dönüşüm formülleri ile hesaplanır:
-
-    Y  =  0.299 × R + 0.587 × G + 0.114 × B
-    Cb = -0.168736 × R - 0.331264 × G + 0.5 × B + 128
-    Cr =  0.5 × R - 0.418688 × G - 0.081312 × B + 128
-
-3. Y bileşeni parlaklığı (luminance), Cb ve Cr bileşenleri ise mavi ve kırmızıya olan renk farklarını temsil eder.
-
-Sonuçta, Y [0, 255], Cb ve Cr [0, 255] aralığındadır.
+Bu işlem, RGB renk uzayındaki bir görüntüyü YCbCr (Luminance, Chrominance) renk uzayına dönüştürür.
 """,
 r"""Histogram Germe
 
@@ -177,6 +142,22 @@ r"""Filtre (Median)
 bilgiler...
 """,
 r"""Filtre (Unsharp)
+
+bilgiler...
+""",
+r"""Morfolojik İşlemler Genişleme
+
+bilgiler...
+""",
+r"""Morfolojik İşlemler Aşınma
+
+bilgiler...
+""",
+r"""Morfolojik İşlemler Açma
+
+bilgiler...
+""",
+r"""Morfolojik İşlemler Kapama
 
 bilgiler...
 """,
