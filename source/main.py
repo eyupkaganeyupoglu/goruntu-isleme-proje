@@ -1,7 +1,7 @@
-# Python version:  3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]
-# OpenCV version:  4.9.0
-# Numpy version:   1.26.4
-# PyQt5 version:   5.15.10
+# Python version:  3.10.11
+# OpenCV version:  4.11.0.86
+# Numpy version:   2.2.5
+# PyQt5 version:   5.15.11
 
 # DİKKAT: cv2 türkçe karakterlere karşı sorun çıkarıyor. Bu yüzden uygulamayı ascii'ye uygun karakterler içeren path'da çalıştırdığınıza emin olun...
 

@@ -112,7 +112,7 @@ Mavi farkı (Cb) değeri hesaplanır:
 Sonuç görüntüsü, delta değerine göre uygun veri tipine dönüştürülür ve değerler, belirli bir aralığa sıkıştırılır.
 """,
 r"""Histogram Germe
-`image1`
+`image2`
 
 Bu fonksiyon, görüntüdeki parlaklık değerlerinin histogramını gererek daha geniş bir aralığa yayılmasını sağlar.
 
@@ -129,7 +129,7 @@ Burada:
 Sonuç olarak, kontrastı artırılmış bir görüntü elde edilir.
 """,
 r"""Histogram Genişletme
-`image1`
+`image2`
 
 Bu fonksiyon, görüntüdeki parlaklık değerlerinin histogramını genişleterek daha fazla çeşitlilik sağlar. Bu işlem, görüntünün kontrastını artırmak için kullanılır.
 
