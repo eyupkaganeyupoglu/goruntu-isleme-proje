@@ -1,5 +1,0 @@
-Her şey tamam, her şeyi main'e geçirip:
-- terminal testleri
-- Fonksiyon testleri
-
-yap ve videoyu çek.

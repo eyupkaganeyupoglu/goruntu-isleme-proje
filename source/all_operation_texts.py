@@ -30,7 +30,7 @@ Orijinal görüntü, bounding box'un merkezine yerleştirilir.
 
 Her bir pikselin yeni konumu hesaplamak için aşağıdaki formül kullanılır:
 
-    x' = (x - x_center) * cos(theta) + (y - y_center) * sin(theta) + x_center
+    x' =  (x - x_center) * cos(theta) + (y - y_center) * sin(theta) + x_center
     y' = -(x - x_center) * sin(theta) + (y - y_center) * cos(theta) + y_center
 
 theta: döndürme açısını radian cinsinden ifade eder.
@@ -40,9 +40,9 @@ Döndürme işlemiyle elde edilen yeni koordinatlar, en yakın alt ve üst tam s
 Her pikselin rengi, bu dört komşu pikselin değerleri kullanılarak, her iki eksendeki interpolasyon farklarına göre ağırlıklı biçimde hesaplanan bilinear interpolasyon yöntemiyle belirlenir.
 
     P = (1 - a) * (1 - b) * Q11 +
-        a       * (1 - b) * Q21 +
+             a  * (1 - b) * Q21 +
         (1 - a) * b       * Q12 +
-        a       * b       * Q22  
+             a  * b       * Q22  
 
 Burada:
 - P: Yeni pikselin değeri
@@ -298,28 +298,28 @@ Fonksiyon, aşağıdaki adımları takip eder:
 Sonuç olarak, görüntüdeki kenarlar ve ayrıntılar daha belirgin hale gelir.
 """,
 r"""Morfolojik İşlemler Genişleme
-`image1`
+`image4`
 
 Bu fonksiyon, morfolojik genişleme (dilation) işlemi uygulayarak bir ikili (binary) görüntüyü genişletir.
 
 Genişleme işlemi, ikili görüntüdeki her beyaz pikselin çevresindeki komşu pikselleri de beyaz yaparak görüntüyü genişletir.
 """,
 r"""Morfolojik İşlemler Aşınma
-`image1`
+`image4`
 
 Bu fonksiyon, morfolojik aşınma (erosion) işlemi uygulayarak bir ikili (binary) görüntüyü daraltır.
 
 Aşınma işlemi, ikili görüntüdeki her siyah pikselin çevresindeki komşu pikselleri de siyah yaparak görüntüyü daraltır.
 """,
 r"""Morfolojik İşlemler Açma
-`image1`
+`image4`
 
 Bu fonksiyon, morfolojik açma (opening) işlemi uygulayarak bir ikili (binary) görüntüyü açar.
 
 Açma işlemi, önce aşınma (erosion) işlemi ardından genişleme (dilation) işlemi uygular.
 """,
 r"""Morfolojik İşlemler Kapama
-`image1`
+`image4`
 
 Bu fonksiyon, morfolojik kapama (closing) işlemi uygulayarak bir ikili (binary) görüntüyü kapatır.
 
